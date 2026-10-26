@@ -1,13 +1,15 @@
 {
-  "background_color": "#ffffff",
-  "dir": "ltr",
-  "display": "standalone",
   "name": "Aqua Fisherman",
-  "orientation": "any",
-  "scope": "/",
   "short_name": "Fishing",
   "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
   "theme_color": "#ffffff",
-  "id": "com.ghasaq.fishinggame",
-  "description": "لعبة صيد سمك ممتعة ومثيرة"
+  "icons": [
+    {
+      "src": "https://qysralkym5-ai.github.io/Ghasaq-.-Ghazal/",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
