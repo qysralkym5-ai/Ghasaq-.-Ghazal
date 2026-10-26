@@ -1,7 +1,6 @@
-{
-  "name": "Aqua Fisherman",
+"name": "Aqua Fisherman",
   "short_name": "Fishing",
-  "start_url": "/",
+  "start_url": "https://qysralkym5-ai.github.io/Ghasaq-.-Ghazal/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
@@ -10,6 +9,3 @@
       "src": "https://qysralkym5-ai.github.io/Ghasaq-.-Ghazal/",
       "sizes": "512x512",
       "type": "image/png"
-    }
-  ]
-}
