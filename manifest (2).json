@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Aqua Fisherman",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Fishing",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "id": "com.ghasaq.fishinggame",
+  "description": "لعبة صيد سمك ممتعة ومثيرة"
+}
