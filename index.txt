@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عالم الصيد | Aqua Fisherman</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+        body {
+            background-color: #0c1021;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .game-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            max-height: 800px;
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        /* الهيدر ومعلومات اللعبة */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 10;
+            font-size: 14px;
+        }
+        .stat-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stat-box span {
+            font-weight: bold;
+            color: #ffd700;
+        }
+        /* منطقة اللعب Canvas */
+        #gameCanvas {
+            flex: 1;
+            background: transparent;
+            cursor: pointer;
+            display: block;
+        }
+        /* أزرار التحكم والأسفل */
+        .controls {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-around;
+            z-index: 10;
+        }
+        .btn {
+            background: linear-gradient(45deg, #ff7300, #ffa700);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: 0.2s;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        .btn-shop {
+            background: linear-gradient(45deg, #00b09b, #96c93d);
+        }
+        .btn-ad {
+            background: linear-gradient(45deg, #8e2de2, #4a00e0);
+            font-size: 12px;
+            padding: 8px 12px;
+        }
+        /* واجهة المتجر والنوافذ المنبثقة */
+        .modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+            text-align: center;
+        }
+        .modal.hidden {
+            display: none;
+        }
+        .modal h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        .shop-item {
+            background: rgba(255, 255, 255, 0.1);
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        /* إعلان محاكي في الأسفل */
+        .banner-ad {
+            background: #222;
+            color: #aaa;
+            font-size: 11px;
+            text-align: center;
+            padding: 5px;
+            border-top: 1px solid #444;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- معلومات المرحلة والرصيد -->
+    <div class="header">
+        <div class="stat-box">المرحلة: <span id="levelText">1</span></div>
+        <div class="stat-box">الهدف: <span id="goalText">500</span> نقطة</div>
+        <div class="stat-box">الأموال: <span id="moneyText">0</span>$</div>
+    </div>
+
+    <!-- شاشة اللعب الرسومية -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- أزرار التحكم -->
+    <div class="controls">
+        <button class="btn btn-shop" onclick="toggleShop()">متجر التطورات 🛒</button>
+        <button class="btn btn-ad" onclick="watchAdForReward()">إعلان مكافأة 🎁</button>
+    </div>
+
+    <!-- شريط إعلانات بانر محاكي -->
+    <div class="banner-ad">إعلان AdMob Banner: ربحك يبدأ من هنا (محاكاة)</div>
+
+    <!-- شاشة المتجر -->
+    <div id="shopModal" class="modal hidden">
+        <h2>متجر معدات الصيد 🎣</h2>
+        <div class="shop-item">
+            <div>
+                <p><b>عمق الخيط</b></p>
+                <small>يصل لأسماك أعمق وأثمن</small>
+            </div>
+            <button class="btn" onclick="upgradeItem('depth')">50$</button>
+        </div>
+        <div class="shop-item">
+            <div>
+                <p><b>سرعة السحب</b></p>
+                <small>سحب أسرع للأسماك</small>
+            </div>
+            <button class="btn" onclick="upgradeItem('speed')">75$</button>
+        </div>
+        <button class="btn" style="margin-top: 20px; background: #e74c3c;" onclick="toggleShop()">إغلاق المتجر</button>
+    </div>
+
+    <!-- شاشة انتهاء المرحلة أو الفوز -->
+    <div id="messageModal" class="modal">
+        <h2 id="modalTitle">عالم الصيد | Aqua Fisherman</h2>
+        <p id="modalDesc" style="margin-bottom: 20px;">اصطد الأسماك واجمع النقاط لتجاوز المراحل الصعبة!</p>
+        <button class="btn" onclick="startGame()">ابدأ الصيد 🎣</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight - 130;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // متغيرات اللعبة
+    let score = 0;
+    let money = 0;
+    let level = 1;
+    let goal = 500;
+    let hookSpeed = 3;
+    let maxDepth = 400;
+
+    let gameState = 'START'; // START, PLAYING, GAMEOVER, LEVEL_CLEAR
+    let hook = { x: canvas.width / 2, y: 50, state: 'IDLE', length: 50 }; // IDLE, DOWN, UP
+    let fishes = [];
+
+    // إنشاء الأسماك بناءً على المرحلة
+    function initFishes() {
+        fishes = [];
+        let count = 6 + (level * 2);
+        for (let i = 0; i < count; i++) {
+            fishes.push({
+                x: Math.random() * canvas.width,
+                y: 150 + Math.random() * (canvas.height - 200),
+                speed: (Math.random() * 1.5 + 0.5) * (Math.random() < 0.5 ? 1 : -1),
+                size: Math.random() * 15 + 10,
+                type: Math.random() > 0.8 ? 'gold' : (Math.random() > 0.9 ? 'trash' : 'normal'),
+                value: Math.floor(Math.random() * 30 + 10) * level
+            });
+        }
+    }
+
+    function startGame() {
+        document.getElementById('messageModal').classList.add('hidden');
+        score = 0;
+        hook.state = 'IDLE';
+        hook.length = 50;
+        initFishes();
+        gameState = 'PLAYING';
+    }
+
+    // النقر للنزول بالسنارة
+    canvas.addEventListener('click', () => {
+        if (gameState === 'PLAYING' && hook.state === 'IDLE') {
+            hook.state = 'DOWN';
+        }
+    });
+
+    function update() {
+        if (gameState !== 'PLAYING') return;
+
+        // حركة السنارة
+        if (hook.state === 'DOWN') {
+            hook.length += hookSpeed;
+            if (hook.length >= maxDepth || hook.length >= canvas.height - 100) {
+                hook.state = 'UP';
+            }
+        } else if (hook.state === 'UP') {
+            hook.length -= hookSpeed;
+            if (hook.length <= 50) {
+                hook.length = 50;
+                hook.state = 'IDLE';
+            }
+        }
+
+        // حركة الأسماك
+        fishes.forEach(fish => {
+            fish.x += fish.speed;
+            if (fish.x < 0 || fish.x > canvas.width) fish.speed *= -1;
+
+            // كشف الاصطدام مع السنارة
+            let hookTipX = canvas.width / 2;
+            let hookTipY = 50 + hook.length;
+            let dist = Math.hypot(hookTipX - fish.x, hookTipY - fish.y);
+
+            if (dist < fish.size + 10 && hook.state === 'DOWN') {
+                hook.state = 'UP';
+                if (fish.type === 'trash') {
+                    score = Math.max(0, score - 20);
+                } else {
+                    score += fish.value;
+                    money += fish.value / 2;
+                }
+                // إعادة تدوير السمكة
+                fish.y = -100;
+                checkLevelProgress();
+            }
+        });
+
+        updateUI();
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // رسم الماء والموج
+        ctx.fillStyle = "rgba(0, 150, 255, 0.1)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // رسم الأسماك
+        fishes.forEach(fish => {
+            ctx.beginPath();
+            ctx.arc(fish.x, fish.y, fish.size, 0, Math.PI * 2);
+            ctx.fillStyle = fish.type === 'gold' ? '#ffd700' : (fish.type === 'trash' ? '#555' : '#ff7b00');
+            ctx.fill();
+            ctx.closePath();
+        });
+
+        // رسم حبل السنارة والصنارة
+        let hookX = canvas.width / 2;
+        let hookY = 50 + hook.length;
+
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(hookX, 50);
+        ctx.lineTo(hookX, hookY);
+        ctx.stroke();
+
+        // خطاف السنارة
+        ctx.fillStyle = '#silver';
+        ctx.beginPath();
+        ctx.arc(hookX, hookY, 6, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    function updateUI() {
+        document.getElementById('levelText').innerText = level;
+        document.getElementById('goalText').innerText = goal;
+        document.getElementById('moneyText').innerText = Math.floor(money);
+    }
+
+    function checkLevelProgress() {
+        if (score >= goal) {
+            gameState = 'LEVEL_CLEAR';
+            let modal = document.getElementById('messageModal');
+            document.getElementById('modalTitle').innerText = `أهلاً بك في المرحلة ${level + 1}! 🎉`;
+            document.getElementById('modalDesc').innerText = `أحسنت! حققت النقاط المطلوبة (${score}/${goal}). جهز نفسك لتحدٍ أعمق وأصعب!`;
+            modal.classList.remove('hidden');
+            level++;
+            goal += 600 * level;
+        }
+    }
+
+    function toggleShop() {
+        let shop = document.getElementById('shopModal');
+        shop.classList.toggle('hidden');
+    }
+
+    function upgradeItem(type) {
+        if (type === 'depth' && money >= 50) {
+            money -= 50;
+            maxDepth += 80;
+            alert("تم تطوير عمق الخيط بنجاح!");
+        } else if (type === 'speed' && money >= 75) {
+            money -= 75;
+            hookSpeed += 1.5;
+            alert("تم تطوير سرعة السحب بنجاح!");
+        } else {
+            alert("عذراً، لا توجد أموال كافية!");
+        }
+        updateUI();
+    }
+
+    function watchAdForReward() {
+        alert("📺 (محاكاة إعلان): شكراً لمشاهدة الإعلان! تم منحك +100 نقطة مساعدة.");
+        score += 100;
+        checkLevelProgress();
+    }
+
+    loop();
+</script>
+
+</body>
+</html>
